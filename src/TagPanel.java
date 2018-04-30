@@ -72,9 +72,10 @@ public class TagPanel extends JPanel {
                 realBeginPoint.y > realEndPoint.y ? realBeginPoint.y : realEndPoint.y);
     }
 
-    void saveCurrentLabel(int num) {
+    void saveCurrentLabel(int num, boolean is_truncated, boolean is_difficult) {
         TagLabel label = getCurrentLabel();
         label.setLandmarkNum(num);
+        label.setState(is_truncated, is_difficult);
         mLabelList.add(label);
 
         mBeginPoint.setLocation(0, 0);

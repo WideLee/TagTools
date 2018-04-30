@@ -19,6 +19,8 @@ public class Main {
     private TagPanel mImagePanel;
     private JLabel mLandmarkLabel;
     private JButton mNextButton;
+    private JCheckBox mDifficultCheckBox;
+    private JCheckBox mTruncatedCheckBox;
 
     private Map<String, String> mLabelList;
 
@@ -56,7 +58,10 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    mImagePanel.saveCurrentLabel(Integer.valueOf(mLandmarkNum.getText()));
+                    boolean is_truncated = mTruncatedCheckBox.isSelected();
+                    boolean is_difficult = mDifficultCheckBox.isSelected();
+                    mImagePanel.saveCurrentLabel(Integer.valueOf(mLandmarkNum.getText()),
+                            is_truncated, is_difficult);
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(mMainPanel,
                             "Error: Landmark number must be a number", "Error Massage",
@@ -113,6 +118,7 @@ public class Main {
     }
 
     private void createUIComponents() {
+
         mImagePanel = new TagPanel();
 
         TagPanel.onLandmarkRegionChangeListener listener = new TagPanel.onLandmarkRegionChangeListener() {
@@ -159,8 +165,10 @@ public class Main {
                  * output format
                  * frame filename | left_x | left_y | right_x | right_y | landmark_id
                  */
-                ps.printf("%s %d %d %d %d %d\n", mFrameImagePath,
-                        label.left_x, label.left_y, label.right_x, label.right_y, label.landmark_num);
+                ps.printf("%s %d %d %d %d %d %d %d\n", mFrameImagePath,
+                        label.left_x, label.left_y, label.right_x,
+                        label.right_y, label.landmark_num,
+                        label.is_truncated ? 1 : 0, label.is_difficult ? 1 : 0);
             }
 
             ps.flush();

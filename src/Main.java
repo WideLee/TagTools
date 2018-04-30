@@ -124,7 +124,7 @@ public class Main {
         TagPanel.onLandmarkRegionChangeListener listener = new TagPanel.onLandmarkRegionChangeListener() {
             @Override
             public void onLandmarkRegionChange(TagLabel label) {
-                System.out.printf(Locale.ENGLISH, "rectangle: %d %d %d %d",
+                System.out.printf(Locale.ENGLISH, "rectangle: %d %d %d %d\n",
                         label.left_x, label.left_y, label.right_x, label.right_y);
                 mLandmarkNum.requestFocus();
                 mLandmarkNum.selectAll();

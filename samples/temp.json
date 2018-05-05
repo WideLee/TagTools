@@ -1,0 +1,24 @@
+{
+    "image_name": "/mnt/UserData/Mingkuan/Public/tf-faster-rcnn/data/temp.jpg",
+    "object_num": 2,
+    "objects": [
+        {
+            "id": "2014",
+            "bndbox": {
+                "xmin": 182.81997680664062,
+                "ymin": 1110.330810546875,
+                "xmax": 863.7496337890625,
+                "ymax": 1391.696533203125
+            }
+        },
+        {
+            "id": "2015",
+            "bndbox": {
+                "xmin": 1592.546630859375,
+                "ymin": 1241.732666015625,
+                "xmax": 2470.668212890625,
+                "ymax": 1580.12744140625
+            }
+        }
+    ]
+}

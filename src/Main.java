@@ -1,3 +1,5 @@
+import json.JSONObject;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -23,6 +25,7 @@ public class Main {
     private JCheckBox mTruncatedCheckBox;
 
     private Map<String, String> mLabelList;
+    private List<TagLabel> mReferenceLabels;
 
     private String mOutputFilename;
     private String mFrameImagePath;
@@ -89,7 +92,7 @@ public class Main {
          * frame filename | left_x | left_y | right_x | right_y | landmark_id
          */
 
-        if (args.length != 3) {
+        if (args.length < 3) {
             JOptionPane.showMessageDialog(null,
                     "Error: run this app with three arguments", "Error Massage",
                     JOptionPane.ERROR_MESSAGE);
@@ -107,6 +110,9 @@ public class Main {
         main.setFrameImagePath(args[0]);
         main.setOutputFilename(args[1]);
         main.setLandmarkList(args[2]);
+        if (args.length > 3) {
+            main.setReferenceRegion(args[3]);
+        }
 
         main.nextImage();
     }
@@ -126,6 +132,18 @@ public class Main {
             public void onLandmarkRegionChange(TagLabel label) {
                 System.out.printf(Locale.ENGLISH, "rectangle: %d %d %d %d\n",
                         label.left_x, label.left_y, label.right_x, label.right_y);
+                float maxIoU = 0;
+                int maxIndex = 0;
+                for (TagLabel l : mReferenceLabels) {
+                    float iou = l.calculateIoU(label);
+                    if(iou > maxIoU) {
+                        maxIoU = iou;
+                        maxIndex = l.landmark_num;
+                    }
+                }
+                if(maxIoU != 0) {
+                    mLandmarkNum.setText(String.format("%d", maxIndex));
+                }
                 mLandmarkNum.requestFocus();
                 mLandmarkNum.selectAll();
             }
@@ -140,8 +158,33 @@ public class Main {
             int count = 1;
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
+                mLabelList.put(line.split(" ")[0], line);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
-                mLabelList.put(Integer.toString(count++), line);
+    private void setReferenceRegion(String referenceFile) {
+        try {
+            Scanner scanner = new Scanner(new File(referenceFile));
+            StringBuilder json = new StringBuilder();
+            while (scanner.hasNext()) {
+                String line = scanner.nextLine();
+                json.append(line);
+            }
+            JSONObject object = new JSONObject(json.toString());
+            mReferenceLabels = new ArrayList<>();
+            for (int i = 0; i < object.getInt("object_num"); i++) {
+                JSONObject rect = object.getJSONArray("objects").getJSONObject(i);
+                float xmin = rect.getJSONObject("bndbox").getFloat("xmin");
+                float ymin = rect.getJSONObject("bndbox").getFloat("ymin");
+                float xmax = rect.getJSONObject("bndbox").getFloat("xmax");
+                float ymax = rect.getJSONObject("bndbox").getFloat("ymax");
+                TagLabel label = new TagLabel((int) xmin, (int) ymin, (int) xmax, (int) ymax);
+                int landmark_num = rect.getString("id").equals("undefined") ? -1 : Integer.parseInt(rect.getString("id"));
+                label.setLandmarkNum(landmark_num);
+                mReferenceLabels.add(label);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -161,9 +204,9 @@ public class Main {
             PrintStream ps = new PrintStream(new File(mOutputFilename));
 
             for (TagLabel label : labels) {
-                /**
-                 * output format
-                 * frame filename | left_x | left_y | right_x | right_y | landmark_id
+                /*
+                  output format
+                  frame filename | left_x | left_y | right_x | right_y | landmark_id
                  */
                 ps.printf("%s %d %d %d %d %d %d %d\n", mFrameImagePath,
                         label.left_x, label.left_y, label.right_x,

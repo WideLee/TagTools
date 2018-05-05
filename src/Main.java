@@ -80,6 +80,9 @@ public class Main {
                 mImagePanel.clearLabel();
             }
         });
+
+        mReferenceLabels = new ArrayList<>();
+        mLabelList = new HashMap<>();
     }
 
     public static void main(String[] args) {
@@ -154,7 +157,6 @@ public class Main {
     private void setLandmarkList(String labelList) {
         try {
             Scanner scanner = new Scanner(new File(labelList));
-            mLabelList = new HashMap<>();
             int count = 1;
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
@@ -174,7 +176,6 @@ public class Main {
                 json.append(line);
             }
             JSONObject object = new JSONObject(json.toString());
-            mReferenceLabels = new ArrayList<>();
             for (int i = 0; i < object.getInt("object_num"); i++) {
                 JSONObject rect = object.getJSONArray("objects").getJSONObject(i);
                 float xmin = rect.getJSONObject("bndbox").getFloat("xmin");
